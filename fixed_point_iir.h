@@ -20,7 +20,8 @@ public:
     using input_array_t = std::array<InOutType, feedforward_order + 1>;
     using output_array_t = std::array<InOutType, feedback_order + 1>;
 
-    constexpr fixed_point_iir(const fb_coeff_array_t& a, const ff_coeff_array_t& b)
+    constexpr fixed_point_iir(const fb_coeff_array_t& a,
+                              const ff_coeff_array_t& b)
         : m_a(a), m_b(b), m_x{}, m_y{} { }
 
     void reset() {
