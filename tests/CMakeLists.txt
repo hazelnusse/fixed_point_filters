@@ -7,3 +7,9 @@ add_executable(test_fir
 target_link_libraries(test_fir ${GTEST_BOTH_LIBRARIES})
 add_test(TestFIR test_fir)
 
+add_executable(test_iir
+    test_iir.cc
+    ${EMBEDDED_FILTER_SOURCE_DIR}/fixed_point_iir.h)
+target_link_libraries(test_iir ${GTEST_BOTH_LIBRARIES})
+add_test(TestIIR test_iir)
+
