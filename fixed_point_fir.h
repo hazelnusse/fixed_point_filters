@@ -5,17 +5,7 @@
 #include <array>
 #include <cstdint>
 
-template <std::uint16_t scale_factor, typename T = std::int32_t>
-struct scaled_double_as_int {
-    constexpr scaled_double_as_int(const double value)
-        : m_value{static_cast<T>(value * scale_factor)} {
-        static_assert(std::is_integral<T>::value, "T must be integral");
-    }
-
-    constexpr operator T() { return m_value; };
-
-    T m_value;
-};
+#include "scaled_double_as_int.h"
 
 template <std::uint16_t scale_factor,
           std::size_t FilterOrder,
