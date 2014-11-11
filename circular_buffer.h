@@ -166,7 +166,7 @@ public:
     }
 
     circular_buffer_iter operator++(int) {
-        circular_buffer_iter<T, N> clone(*this);
+        circular_buffer_iter<T, N> clone(m_circular_buffer, m_offset);
         ++m_offset;
         return clone;
     }
@@ -201,8 +201,13 @@ public:
     }
 
     const_circular_buffer_iter operator++(int) {
-        const_circular_buffer_iter<T, N> clone(*this);
+        const_circular_buffer_iter<T, N> clone(m_circular_buffer, m_offset);
         ++m_offset;
+        return clone;
+    }
+
+    const_circular_buffer_iter operator+(int offset) {
+        const_circular_buffer_iter<T, N> clone(m_circular_buffer, m_offset + offset);
         return clone;
     }
 
