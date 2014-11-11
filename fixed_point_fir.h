@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 
+#include "circular_buffer.h"
 #include "scaled_double_as_int.h"
 
 template <std::uint16_t scale_factor,
@@ -15,7 +16,7 @@ class fixed_point_fir {
 public:
     using scaled_int = scaled_double_as_int<scale_factor, UpScaledType>;
     using ff_coeff_array_t = std::array<scaled_int, feedforward_order + 1>;
-    using input_array_t = std::array<InOutType, feedforward_order + 1>;
+    using input_buffer_t = circular_buffer<InOutType, feedforward_order + 1>;
 
     constexpr fixed_point_fir(const ff_coeff_array_t& b) : m_b(b), m_x{} {}
 
@@ -24,15 +25,14 @@ public:
     }
 
     InOutType filter(const InOutType x_n) {
-        std::copy(m_x.crbegin() + 1, m_x.crend(), m_x.rbegin());
-        m_x[0] = x_n;
+        m_x.push_front(x_n);
         return std::inner_product(m_x.cbegin(), m_x.cend(), m_b.cbegin(), 0)
             / scale_factor;
     }
 
 private:
     const ff_coeff_array_t m_b;
-    input_array_t m_x;
+    input_buffer_t m_x;
 };
 
 #endif
