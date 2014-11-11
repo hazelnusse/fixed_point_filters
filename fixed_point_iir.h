@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 
+#include "circular_buffer.h"
 #include "scaled_double_as_int.h"
 
 template <std::uint16_t scale_factor,
@@ -17,8 +18,8 @@ public:
     using scaled_int = scaled_double_as_int<scale_factor, UpScaledType>;
     using ff_coeff_array_t = std::array<scaled_int, feedforward_order + 1>;
     using fb_coeff_array_t = std::array<scaled_int, feedback_order + 1>;
-    using input_array_t = std::array<InOutType, feedforward_order + 1>;
-    using output_array_t = std::array<InOutType, feedback_order + 1>;
+    using input_buffer_t = circular_buffer<InOutType, feedforward_order + 1>;
+    using output_buffer_t = circular_buffer<InOutType, feedback_order + 1>;
 
     constexpr fixed_point_iir(const fb_coeff_array_t& a,
                               const ff_coeff_array_t& b)
@@ -30,23 +31,21 @@ public:
     }
 
     InOutType filter(const InOutType x_n) {
-        std::copy(m_x.crbegin() + 1, m_x.crend(), m_x.rbegin());
-        m_x[0] = x_n;
-        std::copy(m_y.crbegin() + 1, m_y.crend(), m_y.rbegin());
+        m_x.push_front(x_n);
+        m_y.push_front(0);
+        m_y.front() = (
+            std::inner_product(m_x.cbegin(), m_x.cend(), m_b.cbegin(), 0) -
+            std::inner_product(m_y.cbegin() + 1, m_y.cend(), m_a.cbegin() + 1,
+                               0)) / m_a[0];
 
-        m_y[0] = (std::inner_product(m_x.cbegin(), m_x.cend(),
-                                     m_b.cbegin(), 0) -
-                  std::inner_product(m_y.cbegin() + 1, m_y.cend(),
-                                     m_a.cbegin() + 1, 0)) / m_a[0];
-
-        return m_y[0];
+        return m_y.front();
     }
 
 private:
     const fb_coeff_array_t m_a;
     const ff_coeff_array_t m_b;
-    input_array_t m_x;
-    output_array_t m_y;
+    input_buffer_t m_x;
+    output_buffer_t m_y;
 };
 
 #endif
